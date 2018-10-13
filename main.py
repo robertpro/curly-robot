@@ -136,6 +136,7 @@ def find_strawberry(image):
 images_folder = 'images'
 result_folder = images_folder + '/result'
 
+"""
 for i in range(1, 2 + 1):
     for color_fondo in ('blanco', 'negro'):
         image_name = f'{images_folder}/figuras{i}_{color_fondo}.jpg'
@@ -145,3 +146,11 @@ for i in range(1, 2 + 1):
         # write the new image
         image_name = f'{result_folder}/figuras{i}_{color_fondo}.jpg'
         cv2.imwrite(image_name, result)
+"""
+
+image_name = f'{images_folder}/test.jpeg'
+image = cv2.imread(image_name)
+
+result = find_strawberry(image)
+image_name = f'{result_folder}/test.jpeg'
+cv2.imwrite(image_name, result)
