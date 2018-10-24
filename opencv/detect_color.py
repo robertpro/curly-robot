@@ -43,16 +43,11 @@ for color in boundaries.keys():
     lower = boundaries[color].get('lower')
     upper = boundaries[color].get('upper')
 
-    mask = cv2.inRange(image, lower, upper)
+    masks.append(cv2.inRange(image, lower, upper))
 
-    masks.append(mask)
+mask = sum(masks)
 
-
-new_mask = masks[0]
-for i in range(len(masks) - 1):
-    new_mask = cv2.bitwise_or(new_mask, masks[i + 1])
-
-output = cv2.bitwise_and(image, image, mask=new_mask)
+output = cv2.bitwise_and(image, image, mask=mask)
 
 cv2.imshow("images", np.hstack([image, output]))
 cv2.waitKey(0)
