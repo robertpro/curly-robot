@@ -3,11 +3,20 @@ import numpy as np
 import cv2
 
 # load the image
-image = cv2.imread("../images/figuras/red.png")
-image = cv2.imread("../images/figuras/blue.png")
-image = cv2.imread("../images/figuras/green.png")
-image = cv2.imread("../images/figuras/yellow.png")
+# image = cv2.imread("../images/figuras/red.png")
+# image = cv2.imread("../images/figuras/blue.png")
+# image = cv2.imread("../images/figuras/green.png")
+# image = cv2.imread("../images/figuras/yellow.png")
 image = cv2.imread("../images/figuras/base2.png")
+
+max_dimension = max(image.shape)
+# The maximum window size is 700 by 660 pixels. make it fit in that
+scale = 650 / max_dimension
+
+# resize it. same width and hieght none since output is 'image'.
+image = cv2.resize(image, None, fx=scale, fy=scale)
+
+image = cv2.medianBlur(image, 7)
 
 
 # define the list of boundaries
