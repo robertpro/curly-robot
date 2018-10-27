@@ -58,5 +58,15 @@ mask = sum(masks)
 
 output = cv2.bitwise_and(image, image, mask=mask)
 
+template = cv2.imread('../images/figuras/pinzas.png', 1)
+
+w, h, _ = template.shape[::-1]
+
+res = cv2.matchTemplate(output, template, cv2.TM_CCOEFF_NORMED)
+threshold = 0.5
+loc = np.where(res >= threshold)
+for pt in zip(*loc[::-1]):
+    cv2.rectangle(output, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+
 cv2.imshow("images", np.hstack([image, output]))
 cv2.waitKey(0)
