@@ -67,6 +67,7 @@ class TwoWheelVehicle(ev3.EV3):
         self._polarity = 1
         self._port_left = ev3.PORT_D
         self._port_right = ev3.PORT_A
+        self._port_claw = ev3.PORT_B
         self._orientation = 0.0
         self._pos_x = 0.0
         self._pos_y = 0.0
@@ -524,6 +525,37 @@ class TwoWheelVehicle(ev3.EV3):
         diff_y = pos_y - self._pos_y
         dist = math.sqrt(diff_x**2 + diff_y**2)
         self.drive_straight(speed, dist)
+
+    def claw(self, speed: int, open: bool) -> bytes:
+        assert isinstance(speed, int), "speed needs to be an integer value"
+        assert -100 <= speed and speed <= 100, "speed needs to be in range [-100 - 100]"
+        assert isinstance(open, bool), "open needs to be a boolean"
+        if self._polarity == -1:
+            speed *= -1
+        if open:
+            speed *= -1
+        ops_ready = b''.join([
+            ev3.opOutput_Ready,
+            ev3.LCX(0),                                  # LAYER
+            ev3.LCX(self._port_claw)                     # NOS
+        ])
+        ops_start = b''.join([
+            ev3.opOutput_Time_Speed,
+            ev3.LCX(0),                                  # LAYER
+            ev3.LCX(self._port_claw),                    # NOS
+            ev3.LCX(speed),
+            ev3.LCX(200),                                # Time in milliseconds for ramp up
+            ev3.LCX(200),                                # Time in milliseconds for continues run
+            ev3.LCX(200),                                # Time in milliseconds for ramp down
+            ev3.LCX(1),                                  # BRAKE
+            ev3.opOutput_Start,
+            ev3.LCX(0),                                  # LAYER
+            ev3.LCX(self._port_claw)                     # NOS
+        ])
+        if self._sync_mode == ev3.SYNC:
+            return self.send_direct_cmd(ops_start + ops_ready)
+        else:
+            return self.send_direct_cmd(ops_ready + ops_start)
 
     def task_factory(self, drive_type: str, **kwargs) -> task.Task:
         """
