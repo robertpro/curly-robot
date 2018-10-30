@@ -146,6 +146,7 @@ class Task:
         self._args_cont = kwargs.pop('args_cont', ())
         self._kwargs_cont = kwargs.pop('kwargs_cont', {})
         self._exc = kwargs.pop('exc', self._exc_default)
+        #self._exc = self._exc_default
         self._exc.fire()
         assert not kwargs, 'unknown keyword arguments: ' + str(kwargs.keys())
         assert isinstance(self._action, typing.Callable), \

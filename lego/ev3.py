@@ -299,8 +299,9 @@ class EV3:
         # listen on port 3015 for a UDP broadcast from the EV3
         UDPSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         UDPSock.bind(('', 3015))
+        print('Waiting UDP message from EV3')
         data, addr = UDPSock.recvfrom(67)
-
+        print(data)
         # pick serial number, port, name and protocol
         # from the broadcast message
         matcher = re.search('Serial-Number: (\w*)\s\n' +
