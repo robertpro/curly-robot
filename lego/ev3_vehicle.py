@@ -372,7 +372,7 @@ class TwoWheelVehicle(ev3.EV3):
             ev3.LCX(speed),
             ev3.LCX(turn),
             ev3.LCX(step),
-            ev3.LCX(0),                                  # BRAKE
+            ev3.LCX(1),                                  # BRAKE
             ev3.opOutput_Start,
             ev3.LCX(0),                                  # LAYER
             ev3.LCX(self._port_left + self._port_right)  # NOS
@@ -519,7 +519,7 @@ class TwoWheelVehicle(ev3.EV3):
             direct = sign * 90 - math.degrees(math.atan(fract))
         if diff_x < 0:
             direct += 180
-        self.rotate_to(speed, direct)
+        self.rotate_to(int(speed/2), direct)
         # Drive straight 
         diff_x = pos_x - self._pos_x
         diff_y = pos_y - self._pos_y

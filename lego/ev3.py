@@ -321,12 +321,16 @@ class EV3:
 
         # Send an UDP message back to the EV3
         # to make it accept a TCP/IP connection
+        print('Sending Back UDP message to EV3 to accept connection')
         UDPSock.sendto(' '.encode('utf-8'), (addr[0], int(port)))
         UDPSock.close()
+        print('Accepted!')
 
         # Establish a TCP/IP connection with EV3s address and port
+        print('Establish a TCP/IP connection with EV3')
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.connect((addr[0], int(port)))
+        print('Connection established!')
 
         # Send an unlock message to the EV3 over TCP/IP
         msg = 'GET /target?sn=' + serial_number + 'VMTP1.0\n' + \
