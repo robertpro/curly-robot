@@ -8,6 +8,7 @@
 
 import socket
 import ev3, ev3_vehicle
+import numbers
 
 my_vehicle = ev3_vehicle.TwoWheelVehicle(radius_wheel=0.015835, tread=0.1689, protocol=ev3.WIFI, host='00:16:53:5E:89:BD')
 my_vehicle.verbosity = 1
@@ -23,27 +24,29 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen(1)
 print('Listening on port: %s' % PORT)
-conn, addr = s.accept()
-print ('Connected by %s' % addr)
 while 1:
-    data = conn.recv(64)
-    dataparams = data.strip(',')
-    if dataparams[0] == '1':
-        if dataparams[1] == '1':
-            my_vehicle.claw(speed_claw, open=True)
-            conn.send(data)
-        elif dataparams[1] == '2':
-            my_vehicle.claw(speed_claw, open=False)
-            conn.send(data)
+    conn, addr = s.accept()
+    print('Connected')
+    while 1:
+        data = conn.recv(64)
+        datastr = data.decode("utf-8") 
+        if not data: break
+        dataparams = datastr.split(',')
+        if dataparams[0] == '1':
+            if dataparams[1] == '1':
+                my_vehicle.claw(speed_claw, open=True)
+                conn.send(data)
+            elif dataparams[1] == '2':
+                my_vehicle.claw(speed_claw, open=False)
+                conn.send(data)
+            else:
+                conn.send('Message error')
+        elif dataparams[0] == '2':
+            try:
+                my_vehicle.drive_to(speed, float(dataparams[1]),float(dataparams[2]))
+                conn.send(data)
+            except: 
+                print('Message error')
         else:
-            conn.send('Message error')
-    elif dataparams[0] == '2':
-        if isinstance(dataparams[1], numbers.Number) and isinstance(dataparams[2], numbers.Number):
-            my_vehicle.drive_to(speed, dataparams[1],dataparams[2])
-            conn.send(data)
-        else: 
-            conn.send('Message error')
-    else:
-        conn.send('Message error')
-
-conn.close() 
+            print('Message error')
+    conn.close() 
