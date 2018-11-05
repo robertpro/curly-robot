@@ -11,7 +11,7 @@ image = cv2.imread("../images/figuras/base2.png")
 
 max_dimension = max(image.shape)
 # The maximum window size is 700 by 660 pixels. make it fit in that
-scale = 650 / max_dimension
+scale = 750 / max_dimension
 
 # resize it. same width and hieght none since output is 'image'.
 image = cv2.resize(image, None, fx=scale, fy=scale)
@@ -29,19 +29,19 @@ def boundary(x: list) -> np.array:
 boundaries = {
     'red': {
         'lower': boundary([15, 15, 110]),
-        'upper': boundary([90, 90, 255]),
+        'upper': boundary([105, 90, 255]),
     },
     'blue': {
         'lower': boundary([86, 31, 4]),
-        'upper': boundary([220, 96, 50]),
+        'upper': boundary([255, 165, 80]),
     },
     'yellow': {
-        'lower': boundary([25, 116, 160]),
-        'upper': boundary([110, 194, 250]),
+        'lower': boundary([7, 186, 190]),
+        'upper': boundary([30, 240, 255]),
     },
     'green': {
         'lower': boundary([45, 70, 10]),
-        'upper': boundary([100, 250, 90]),
+        'upper': boundary([150, 255, 90]),
     },
 }
 
@@ -57,16 +57,6 @@ for color in boundaries.keys():
 mask = sum(masks)
 
 output = cv2.bitwise_and(image, image, mask=mask)
-
-template = cv2.imread('../images/figuras/pinzas.png', 1)
-
-w, h, _ = template.shape[::-1]
-
-res = cv2.matchTemplate(output, template, cv2.TM_CCOEFF_NORMED)
-threshold = 0.5
-loc = np.where(res >= threshold)
-for pt in zip(*loc[::-1]):
-    cv2.rectangle(output, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
 
 cv2.imshow("images", np.hstack([image, output]))
 cv2.waitKey(0)
