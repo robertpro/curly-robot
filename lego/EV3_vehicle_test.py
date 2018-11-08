@@ -6,7 +6,7 @@ my_vehicle = ev3_vehicle.TwoWheelVehicle(radius_wheel=0.015835, tread=0.1689, pr
 my_vehicle.verbosity = 1
 my_vehicle._pos_x = pos_x_init = 0.075
 my_vehicle._pos_y = pos_y_init = 0.11
-speed = 30
+speed = 70
 speed_claw = 20
 my_vehicle.sync_mode = ev3.SYNC
 

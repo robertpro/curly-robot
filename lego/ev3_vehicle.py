@@ -511,6 +511,8 @@ class TwoWheelVehicle(ev3.EV3):
         # Rotate  
         diff_x = pos_x - self._pos_x
         diff_y = pos_y - self._pos_y
+        if abs(diff_x) < 0.01 and abs(diff_y) < 0.01:
+            return
         if abs(diff_x) > abs(diff_y):
             direct = math.degrees(math.atan(diff_y/diff_x))
         else:

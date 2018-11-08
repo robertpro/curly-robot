@@ -19,12 +19,12 @@ speed_claw = 20
 my_vehicle.sync_mode = ev3.SYNC
 
 HOST = ''                 # Symbolic name meaning the local host
-PORT = 50007              # Arbitrary non-privileged port
+PORT = 50009              # Arbitrary non-privileged port
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen(1)
-print('Listening on port: %s' % PORT)
 while 1:
+    print('Listening on port: %s' % PORT)
     conn, addr = s.accept()
     print('Connected')
     while 1:
@@ -34,16 +34,19 @@ while 1:
         dataparams = datastr.split(',')
         if dataparams[0] == '1':
             if dataparams[1] == '1':
+                print('Opening Claw')
                 my_vehicle.claw(speed_claw, open=True)
                 conn.send(data)
             elif dataparams[1] == '2':
+                print('Closing Claw')
                 my_vehicle.claw(speed_claw, open=False)
                 conn.send(data)
             else:
                 conn.send('Message error')
         elif dataparams[0] == '2':
             try:
-                my_vehicle.drive_to(speed, float(dataparams[1]),float(dataparams[2]))
+                print('Driving to %s, %s' % (dataparams[1], dataparams[2]) )
+                my_vehicle.drive_to(speed, float(dataparams[1]) / 100,float(dataparams[2]) / 100)
                 conn.send(data)
             except: 
                 print('Message error')
