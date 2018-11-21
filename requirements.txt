@@ -6,3 +6,5 @@ opencv-python==3.4.3.18
 pyparsing==2.2.2
 python-dateutil==2.7.3
 six==1.11.0
+scipy
+imutils
