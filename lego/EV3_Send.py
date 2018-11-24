@@ -9,10 +9,10 @@
 import socket
 
 HOST = '192.168.43.191'    # The remote host
-PORT = 50007              # The same port as used by the server
+PORT = 50009               # The same port as used by the server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
-s.send('2,0.2,0.2')
+s.send('2,30,30')
 data = s.recv(64)
 s.close()
 print('Received', repr(data))

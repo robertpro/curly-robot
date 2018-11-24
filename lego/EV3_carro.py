@@ -21,19 +21,15 @@ def move(speed: int, turn: int, claw: str) -> None:
     ops = b''.join([
         ev3.opOutput_Speed,
         ev3.LCX(0),                       # LAYER
-        ev3.LCX(ev3.PORT_C),              # NOS
+        ev3.LCX(ev3.PORT_A),              # NOS
         ev3.LCX(speed_right),             # SPEED
         ev3.opOutput_Speed,
         ev3.LCX(0),                       # LAYER
-        ev3.LCX(ev3.PORT_B),              # NOS
+        ev3.LCX(ev3.PORT_D),              # NOS
         ev3.LCX(speed_left),              # SPEED
-        ev3.opOutput_Speed,
-        ev3.LCX(0),                       # LAYER
-        ev3.LCX(ev3.PORT_A),              # NOS
-        ev3.LCX(speed_claw),              # SPEED
         ev3.opOutput_Start,
         ev3.LCX(0),                       # LAYER
-        ev3.LCX(ev3.PORT_C + ev3.PORT_B + ev3.PORT_A)  # NOS
+        ev3.LCX(ev3.PORT_A + ev3.PORT_D)  # NOS
     ])
     myEV3.send_direct_cmd(ops)
 
@@ -43,7 +39,7 @@ def stop() -> None:
     ops = b''.join([
         ev3.opOutput_Stop,
         ev3.LCX(0),                       # LAYER
-        ev3.LCX(ev3.PORT_C + ev3.PORT_B), # NOS
+        ev3.LCX(ev3.PORT_A + ev3.PORT_D), # NOS
         ev3.LCX(0)                        # BRAKE
     ])
     myEV3.send_direct_cmd(ops)
