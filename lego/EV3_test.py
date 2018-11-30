@@ -10,7 +10,4 @@ my_vehicle.verbosity = 1
 speed = 50
 speed_claw = 20
 
-my_vehicle.define_front(claw=False)
-my_vehicle.drive_straight(speed, 0.50)
-# my_vehicle.define_front(claw=False)
-# my_vehicle.drive_straight(speed,0.15)
+my_vehicle.poll_area(speed, 90)

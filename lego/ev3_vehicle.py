@@ -81,6 +81,8 @@ class TwoWheelVehicle(ev3.EV3):
         self._last_pos = None
         self._to_stop = False
         self._test_args = None
+
+        self.update_pos()
         # pylint: enable=too-many-arguments
 
     @property
@@ -154,10 +156,7 @@ class TwoWheelVehicle(ev3.EV3):
             return 0.01
 
     def _update(self, pos: list) -> None:
-        """
-        calculate new position of vehicle
-        """
-        if self._pos is None:
+        if self._pos == None:
             self._orig_diff = pos[1] - pos[0]
             self._pos = pos
             return
@@ -166,15 +165,22 @@ class TwoWheelVehicle(ev3.EV3):
         self._pos = pos
         # orientation
         diff = self._pos[1] - self._pos[0] - self._orig_diff
-        self._orientation += self._polarity * diff * self._radius_wheel / self._tread
+        if self._polarity == 1:
+            orientation = diff * self._radius_wheel / self._tread
+        else:
+            orientation = 180 + diff * self._radius_wheel / self._tread
+        orientation += 180
+        orientation %= 360
+        orientation -= 180 
+        self._orientation = orientation
         # location
         if step[0] == 0 and step[1] == 0:
             pass
         elif self._turn == 0 or step[0] == step[1]:
             # straight
             dist = step[0] * 2 * math.pi * self._radius_wheel / 360
-            self._pos_x += self._polarity * dist * math.cos(math.radians(self._orientation))
-            self._pos_y += self._polarity * dist * math.sin(math.radians(self._orientation))
+            self._pos_x += dist * math.cos(math.radians(self._orientation))
+            self._pos_y += dist * math.sin(math.radians(self._orientation))
         else:
             # turn
             if not self._moves:
@@ -190,6 +196,7 @@ class TwoWheelVehicle(ev3.EV3):
             fact = 2.0 * radius_turn * math.sin(math.radians(0.5*angle))
             self._pos_x += fact * math.cos(math.radians(self._orientation - 0.5*angle))
             self._pos_y += fact * math.sin(math.radians(self._orientation - 0.5*angle))
+        print('Position: %s, %s \nOrientation: %s' % (self._pos_x, self._pos_y, self._orientation))
 
     def _ops_pos(self):
         """
@@ -214,8 +221,7 @@ class TwoWheelVehicle(ev3.EV3):
             ev3.GVX(4)                              # VALUE1
         ])
 
-    def _test_o(self) -> float:
-        (direction, final_o, final_pos) = self._test_args
+    def _test_o(self, direction, final_o, final_pos) -> float:
         if self._to_stop:
             self._to_stop = False
             self._last_t = None
@@ -250,51 +256,32 @@ class TwoWheelVehicle(ev3.EV3):
             rest_o = final_o - self._orientation
             rest_t = delta_t * rest_o / delta_o - self._reaction()
             delta_t_new = min(2, 2*delta_t)
-            if rest_t < (delta_t_new + 0.1):
-                self._to_stop = True
-                wait = rest_t
-            else:
-                wait = delta_t_new
-        return wait
-
-    def _test_pos(self, direction, final_pos) -> float:
-        #(direction, final_pos) = self._test_args
-        if self._to_stop:
-            self._to_stop = False
-            self._last_t = None
-            self._update(final_pos)
-            return -1
-        if not self._last_t:
-            first_call = True
-            wait = 0.1
-        else:
-            first_call = False
-            reply = self.send_direct_cmd(self._ops_pos(), global_mem=8)
-            pos = struct.unpack('<ii', reply[5:])
-            self._update(pos)
-            if direction > 0 and self._pos[0] >= final_pos[0] or \
-               direction < 0 and self._pos[0] <= final_pos[0]:
-                self._last_t = None
-                return -1
-            delta_t = time.time() - self._last_t
-            delta_pos = [self._pos[0] - self._last_pos[0],
-                         self._pos[1] - self._last_pos[1]]
-        self._last_t = time.time()
-        self._last_pos = self._pos
-        if first_call:
-            pass
-        elif abs(delta_pos[0]) < 0.001:
-            wait = 2*delta_t
-        else:
-            rest_pos = final_pos[0] - self._pos[0]
-            rest_t = delta_t * rest_pos / delta_pos[0] - self._reaction()
-            delta_t_new = min(2, 2*delta_t)
-            if rest_t < (delta_t_new + 0.1):
-                self._to_stop = True
-                wait = rest_t
-            else:
-                wait = delta_t_new
+            # if rest_t < (delta_t_new + 0.1):
+            #     self._to_stop = True
+            #     wait = rest_t
+            # else:
+            #     wait = delta_t_new
+            wait = delta_t_new
         return abs(wait)
+
+    def _test_pos(
+            self,
+            direction: float,
+            final_pos: list
+    ) -> bool:
+        reply = self.send_direct_cmd(self._ops_pos(), global_mem=8)
+        pos = struct.unpack('<ii', reply[5:])
+        self._update(pos)
+        if direction > 0 and self._pos[0] >= final_pos[0] or \
+           direction < 0 and self._pos[0] <= final_pos[0]:
+            return False
+        else:
+            return True
+    
+    def update_pos(self) -> None:
+        reply = self.send_direct_cmd(self._ops_pos(), global_mem=8)
+        pos = struct.unpack('<ii', reply[5:])
+        self._update(pos)
 
     def move(self, speed: int, turn: int) -> None:
         """
@@ -377,7 +364,7 @@ class TwoWheelVehicle(ev3.EV3):
             ev3.LCX(0),                                  # LAYER
             ev3.LCX(self._port_left + self._port_right)  # NOS
         ])
-        if self._sync_mode == ev3.SYNC or True:
+        if self._sync_mode == ev3.SYNC:
             return self.send_direct_cmd(ops_start + ops_ready)
         else:
             return self.send_direct_cmd(ops_ready + ops_start)
@@ -418,12 +405,11 @@ class TwoWheelVehicle(ev3.EV3):
                          self._pos[1] + direction * step]
             while True:
                 value = self._test_pos(direction, final_pos)
-                if value == -1 or self.read_infrared() < 5:
+                ir_read = self.read_infrared()
+                if not value or ir_read < 5:
                     break
-                #time.sleep(value)
-                time.sleep(0.01)
+                time.sleep(0.1)
         self.stop(True)
-        print('Position: %s, %s \nOrientation: %s' % (self._pos_x, self._pos_y, self._orientation))
 
     def drive_turn(
             self,
@@ -453,18 +439,19 @@ class TwoWheelVehicle(ev3.EV3):
                 step = - round(angle*rad_left / self._radius_wheel)
             self._drive(speed, turn, step)
         # Calculate orientation and position
-        angle += 180
-        angle %= 360
-        angle -= 180
-        fact = 2.0 * radius_turn * math.sin(math.radians(0.5 * angle))
-        self._orientation += 0.5 * angle
-        self._pos_x += fact * math.cos(math.radians(self._orientation))
-        self._pos_y += fact * math.sin(math.radians(self._orientation))
-        self._orientation += 0.5 * angle
-        self._orientation += 180
-        self._orientation %= 360
-        self._orientation -= 180
-        print('Position: %s, %s \nOrientation: %s' % (self._pos_x, self._pos_y, self._orientation))
+        self._turn = None
+        self.update_pos()
+        # angle += 180
+        # angle %= 360
+        # angle -= 180
+        # fact = 2.0 * radius_turn * math.sin(math.radians(0.5 * angle))
+        # self._orientation += 0.5 * angle
+        # self._pos_x += fact * math.cos(math.radians(self._orientation))
+        # self._pos_y += fact * math.sin(math.radians(self._orientation))
+        # self._orientation += 0.5 * angle
+        # self._orientation += 180
+        # self._orientation %= 360
+        # self._orientation -= 180
 
     def rotate_to(self, speed: int, orientation: float) -> None:
         """
@@ -507,7 +494,7 @@ class TwoWheelVehicle(ev3.EV3):
         assert isinstance(speed, int), "speed needs to be an integer value"
         assert -100 <= speed and speed <= 100, "speed needs to be in range [-100 - 100]"
         assert isinstance(pos_x, numbers.Number), "pos_x needs to be a number"
-        assert isinstance(pos_y, numbers.Number), "pos_y needs to be a number"ç
+        assert isinstance(pos_y, numbers.Number), "pos_y needs to be a number"
         assert stop_at is None or stop_at > 0, "stop_at needs to be positive"
         # Rotate  
         diff_x = pos_x - self._pos_x
@@ -537,8 +524,6 @@ class TwoWheelVehicle(ev3.EV3):
         assert isinstance(speed, int), "speed needs to be an integer value"
         assert -100 <= speed and speed <= 100, "speed needs to be in range [-100 - 100]"
         assert isinstance(open, bool), "open needs to be a boolean"
-        if self._polarity == -1:
-            speed *= -1
         if open:
             speed *= -1
         ops_ready = b''.join([
@@ -559,10 +544,7 @@ class TwoWheelVehicle(ev3.EV3):
             ev3.LCX(0),                                  # LAYER
             ev3.LCX(self._port_claw)                     # NOS
         ])
-        if self._sync_mode == ev3.SYNC:
-            return self.send_direct_cmd(ops_start + ops_ready)
-        else:
-            return self.send_direct_cmd(ops_ready + ops_start)
+        return self.send_direct_cmd(ops_start + ops_ready)
 
     def define_front(self, claw: bool) -> bytes:
         assert isinstance(claw, bool), "claw needs to be a boolean"
@@ -572,17 +554,18 @@ class TwoWheelVehicle(ev3.EV3):
             else:
                 print("Changing claw as the front")
                 self._polarity = 1
-                self._orientation += 180
-                self._orientation %= 360
+                self.update_pos()
+                # self._orientation += 180
+                # self._orientation %= 360
         else:
             if self._polarity == -1:
                 print("Sensor is already the front")
             else:
                 print("Changing sensor as the front")
                 self._polarity = -1
-                self._orientation += 180
-                self._orientation %= 360
-        print('Position: %s, %s \nOrientation: %s' % (self._pos_x, self._pos_y, self._orientation))
+                self.update_pos()
+                # self._orientation += 180
+                # self._orientation %= 360
 
     def read_infrared(self) -> float:
         ops = b''.join([
@@ -608,3 +591,35 @@ class TwoWheelVehicle(ev3.EV3):
     def leave_object(self, speed: int, speed_claw: int) -> float:
         self.claw(speed_claw, open=True)
         self.drive_straight(-speed,0.10)
+
+    def poll_area(
+            self,
+            speed: int,
+            angle: float=None,
+    ) -> None:
+        assert angle > 0, "angle needs to be positive"
+        self.drive_turn(int(speed/2), radius_turn=0, right_turn=False, angle=int(angle/2))
+        self.move(int(speed/4), -200)
+        step_outer = self._polarity * angle * (0.5 * self._tread) / self._radius_wheel
+        step_inner = self._polarity * angle * (-0.5 * self._tread) / self._radius_wheel
+        direction = - math.copysign(1, speed)
+        final_pos = [self._pos[0] - direction * step_outer,
+                        self._pos[1] - direction * step_inner]
+        final_o = self._orientation + direction * angle
+        ir_max = [self._orientation, self.read_infrared()]
+        ir_min = ir_max
+        while True:
+            value = self._test_o(direction, final_o, final_pos)
+            ir_read = self.read_infrared()
+            # update polling data
+            if ir_read > ir_max[1]:
+                ir_max = [self._orientation, ir_read]
+            elif ir_read < ir_min[1]:
+                ir_min = [self._orientation, ir_read]
+            # finish movement 
+            if value == -1:
+                break
+            #time.sleep(value)
+            time.sleep(0.01)
+        self.stop(True)
+        return ir_min
