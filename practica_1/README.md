@@ -8,6 +8,8 @@ En esta practica escogimos presentar el ejemplo de un cliente y un servidor.
 
 ## Requerimientos
 - Python 3
+- paquete click
+- paquete fire
 
 ## Uso
 Para poder usar este proyecto primero se necesita seguir estos pasos
