@@ -19,6 +19,10 @@ def connect():
 @click.command()
 @click.option('--message', help="Message to send")
 def send_message(message):
+    """
+    Send messages to server\n
+    *Caution* "stop" message will stop the server
+    """
     sock = connect()
     try:
     
