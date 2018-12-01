@@ -1,5 +1,5 @@
 #!/bin/env bash
-DIR="/home/reycobra/legoman/curly-robot/photos"
+DIR="/home/reycobra/legoman/curly-robot/images"
 inotifywait -m -r -e create "$DIR" | while read f
 
 do
