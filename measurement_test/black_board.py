@@ -21,7 +21,7 @@ COLORS = {
 }
 
 
-def find_color(image_name, color, cm_pixel_heigth_coefficient):
+def find_color(image_name, color, cm_pixel_heigth_coefficient, cm_pixel_width_coefficient):
     # Resize the image
     image = cv2.imread(image_name)
     image = cv2.resize(image, (800, 600))
@@ -59,7 +59,7 @@ def find_color(image_name, color, cm_pixel_heigth_coefficient):
     # print(cX, cY)
     # print("Black board origin coordinates in cms")
     # print(cX * cm_pixel_heigth_coefficient, cY * cm_pixel_heigth_coefficient)
-    x = cX * cm_pixel_heigth_coefficient
+    x = cX * cm_pixel_width_coefficient
     y = cY * cm_pixel_heigth_coefficient
     return x, y
 
@@ -102,7 +102,7 @@ def find_board(image_name):
     board_width_in_cm = 222.4
     board_heigth_in_pixels = yU - yL
     board_heigth_in_cm = 80.35
-    # cm_pixel_width_coefficient = board_width_in_cm / board_width_in_pixels
+    cm_pixel_width_coefficient = board_width_in_cm / board_width_in_pixels
     cm_pixel_heigth_coefficient = board_heigth_in_cm / board_heigth_in_pixels
     # print("Black board origin coordinates in pixels")
     xO, yO = xB, image_height - yB
@@ -110,4 +110,4 @@ def find_board(image_name):
     # print("Black board origin coordinates in cms")
     # print(xO * cm_pixel_heigth_coefficient, yO * cm_pixel_heigth_coefficient)
 
-    return cm_pixel_heigth_coefficient
+    return cm_pixel_heigth_coefficient, cm_pixel_width_coefficient

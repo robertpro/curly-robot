@@ -22,11 +22,11 @@ def main():
     port = args.get('port')
     image_name = args.get('image')
 
-    cm_pixel_heigth_coefficient = find_board(image_name=image_name)
+    cm_pixel_heigth_coefficient, cm_pixel_width_coefficient = find_board(image_name=image_name)
 
     for color in black_board.COLORS.keys():
         print(f"Finding color: {color}")
-        x, y = find_color(image_name, color, cm_pixel_heigth_coefficient)
+        x, y = find_color(image_name, color, cm_pixel_heigth_coefficient, cm_pixel_width_coefficient)
         print(f"Color found: {color} | X:{x}, Y:{y}")
 
         print(f"Sending lego to {x}, {y} for color {color}")
