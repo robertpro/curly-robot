@@ -11,7 +11,7 @@ import imutils
 import sys
 
 
-url = "http://192.168.43.25:8080/shot.jpg"
+url = "http://10.42.0.190:8080/shot.jpg"
 
 
 RED = 5
@@ -20,9 +20,9 @@ GREEN = 3
 
 
 COLORS = {
-    RED: ([56, 91, 235], [116, 151, 255]),
-    BLUE: ([198, 116, 39], [255, 176, 99]),
-    # GREEN: ([116, 192, 19], [186, 252, 79])
+    RED: ([90, 90, 235], [150, 150, 255]),
+    #BLUE: ([198, 116, 39], [255, 176, 99]),
+    #GREEN: ([116, 192, 19], [186, 252, 79])
 }
 
 
@@ -57,8 +57,8 @@ def find_obj(image, color, board_coefficient):
     cv2.circle(image, (cX, cY), 7, (255, 255, 255), -1)
     cY = image_height - int(M["m01"] / M["m00"])
 
-    #cv2.imshow("Board", image)
-    #cv2.waitKey(0)
+    cv2.imshow("Board", image)
+    cv2.waitKey(0)
 
     #print("Red object location in pixels")
     #print(cX, cY)
@@ -74,8 +74,8 @@ def find_board(image):
 
     # find all the 'black' shapes in the image
     # lower = np.array([0, 0, 0])
-    lower = np.array([45, 45, 45])
-    upper = np.array([65, 65, 65])
+    lower = np.array([20, 20, 20])
+    upper = np.array([60, 60, 60])
     # upper = np.array([130, 130, 130])
     shapeMask = cv2.inRange(image, lower, upper)
     output = cv2.bitwise_and(image, image, mask=shapeMask)
@@ -106,8 +106,8 @@ def find_board(image):
     board_heigth_in_cm = 80.35
     board_coefficient = board_width_in_cm / board_width_in_pixels
     #board_coefficient = board_heigth_in_cm / board_heigth_in_pixels
-    #cv2.imshow("Board", image)
-    #cv2.waitKey(0)
+    cv2.imshow("Board", image)
+    cv2.waitKey(0)
     #print("Black board origin coordinates in pixels")
     xO, yO = xB, image_height - yB
     #print(xO, yO)

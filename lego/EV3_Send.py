@@ -9,10 +9,13 @@
 import socket
 
 
-def send_to_lego(host, port, color, x, y):
+def send_to_lego(host, port, color, x, y, end=False):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host, port))
-    s.send(f'{color},{x:.2f},{y:.2f}')
+    if end:
+        s.send(bytes("0", encoding="utf-8"))
+    else:
+        s.send(bytes(f'{color},{x:.2f},{y:.2f}', encoding="utf-8"))
     data = s.recv(64)
     s.close()
     return repr(data)

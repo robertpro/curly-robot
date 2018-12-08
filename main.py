@@ -5,7 +5,7 @@ from lego.EV3_Send import send_to_lego
 from measurement_test.black_board import find_obj, find_board, take_pic, get_img
 from measurement_test import black_board
 
-HOST = '192.168.43.191'  # The remote host
+HOST = '10.42.0.93'  # The remote host
 PORT = 50007  # The same port as used by the server
 
 
@@ -25,10 +25,10 @@ def main():
     else:
         image = take_pic()
 
-    heigth_coefficient, width_coefficient = find_board(image=image)
+    board_coefficient = find_board(image=image)
     for color in black_board.COLORS.keys():
         print(f"Finding color: {color}")
-        x, y = find_obj(image, color, heigth_coefficient, width_coefficient)
+        x, y = find_obj(image, color, board_coefficient)
         print(f"Color found: {color} | X:{x}, Y:{y}")
 
         print(f"Sending lego to {x}, {y} for color {color}")
@@ -38,6 +38,12 @@ def main():
         except ConnectionRefusedError:
             print(f"Can not connect to {host}:{port}")
         print("*" * 100)
+    else:
+        print("Closing connection")
+        response = send_to_lego(
+            host, port, color=None, x=None, y=None, end=True)
+        print(f"Lego response: {response}")
+
 
 
 if __name__ == "__main__":
