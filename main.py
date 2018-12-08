@@ -33,7 +33,7 @@ def main():
 
         print(f"Sending lego to {x}, {y} for color {color}")
         try:
-            response = send_to_lego(host=host, port=port, x=x, y=y)
+            response = send_to_lego(host=host, port=port, color=color, x=x, y=y)
             print(f"Lego response: {response}")
         except ConnectionRefusedError:
             print(f"Can not connect to {host}:{port}")
