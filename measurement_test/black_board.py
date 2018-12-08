@@ -4,9 +4,14 @@
 
 # import the necessary packages
 from imutils import perspective
+import requests
 import numpy as np
 import cv2
 import imutils
+import sys
+
+
+url = "http://192.168.8.4:8080/shot.jpg"
 
 
 RED = 'red'
@@ -21,10 +26,7 @@ COLORS = {
 }
 
 
-def find_color(image_name, color, cm_pixel_heigth_coefficient, cm_pixel_width_coefficient):
-    # Resize the image
-    image = cv2.imread(image_name)
-    image = cv2.resize(image, (800, 600))
+def find_obj(image, color, heigth_coefficient, width_coefficient):
     image_height, image_width, _ = image.shape
     # find the shapes with the color in the image
     lower, upper = COLORS[color]
@@ -55,19 +57,19 @@ def find_color(image_name, color, cm_pixel_heigth_coefficient, cm_pixel_width_co
     cv2.circle(image, (cX, cY), 7, (255, 255, 255), -1)
     cY = image_height - int(M["m01"] / M["m00"])
 
-    # print("Red object location in pixels")
-    # print(cX, cY)
-    # print("Black board origin coordinates in cms")
-    # print(cX * cm_pixel_heigth_coefficient, cY * cm_pixel_heigth_coefficient)
-    x = cX * cm_pixel_width_coefficient
-    y = cY * cm_pixel_heigth_coefficient
+    #cv2.imshow("Board", image)
+    #cv2.waitKey(0)
+
+    #print("Red object location in pixels")
+    #print(cX, cY)
+    #print("Black board origin coordinates in cms")
+    #print(cX * cm_pixel_heigth_coefficient, cY * cm_pixel_heigth_coefficient)
+    x = cX * width_coefficient
+    y = cY * heigth_coefficient
     return x, y
 
 
-def find_board(image_name):
-    # load the image
-    image = cv2.imread(image_name)
-    image = cv2.resize(image, (800, 600))
+def find_board(image):
     image_height, image_width, _ = image.shape
 
     # find all the 'black' shapes in the image
@@ -102,12 +104,38 @@ def find_board(image_name):
     board_width_in_cm = 222.4
     board_heigth_in_pixels = yU - yL
     board_heigth_in_cm = 80.35
-    cm_pixel_width_coefficient = board_width_in_cm / board_width_in_pixels
-    cm_pixel_heigth_coefficient = board_heigth_in_cm / board_heigth_in_pixels
-    # print("Black board origin coordinates in pixels")
+    width_coefficient = board_width_in_cm / board_width_in_pixels
+    heigth_coefficient = board_heigth_in_cm / board_heigth_in_pixels
+    #cv2.imshow("Board", image)
+    #cv2.waitKey(0)
+    #print("Black board origin coordinates in pixels")
     xO, yO = xB, image_height - yB
-    # print(xO, yO)
-    # print("Black board origin coordinates in cms")
-    # print(xO * cm_pixel_heigth_coefficient, yO * cm_pixel_heigth_coefficient)
+    #print(xO, yO)
+    #print("Black board origin coordinates in cms")
+    #print(xO * heigth_coefficient, yO * heigth_coefficient)
 
-    return cm_pixel_heigth_coefficient, cm_pixel_width_coefficient
+    return heigth_coefficient, width_coefficient
+
+
+def take_pic():
+    try:
+        img_resp = requests.get(url)
+        img_array = np.array(bytearray(img_resp.content), dtype=np.uint8)
+        img = cv2.imdecode(img_array, -1)
+        img = cv2.resize(img, (800, 600))
+
+        cv2.imshow("Android Cam", img)
+        cv2.waitKey(0)
+
+    except:
+        print("Unable to get image from " + url)
+        sys.exit(-1)
+
+    return img
+
+
+def get_img(img_name):
+    img = cv2.imread(img_name)
+    img = cv2.resize(img, (800, 600))
+    return img
+
