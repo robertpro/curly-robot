@@ -10,4 +10,5 @@ my_vehicle.verbosity = 1
 speed = 50
 speed_claw = 20
 
-my_vehicle.poll_area(speed, 90)
+respuesta = my_vehicle.poll_area(speed, 90)
+time.sleep(10)

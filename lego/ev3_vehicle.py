@@ -406,7 +406,9 @@ class TwoWheelVehicle(ev3.EV3):
             while True:
                 value = self._test_pos(direction, final_pos)
                 ir_read = self.read_infrared()
-                if not value or ir_read < 5:
+                if ir_read < 12 and speed > 1:
+                    self.move(int(speed/3),0)
+                if not value or (ir_read < 1 and speed > 1):
                     break
                 time.sleep(0.1)
         self.stop(True)
@@ -516,7 +518,7 @@ class TwoWheelVehicle(ev3.EV3):
         dist = math.sqrt(diff_x**2 + diff_y**2)
         if stop_at:
             dist = dist - stop_at
-            if distance < 0:
+            if dist < 0:
                 return
         self.drive_straight(speed, dist)
 
@@ -581,11 +583,29 @@ class TwoWheelVehicle(ev3.EV3):
         reply = self.send_direct_cmd(ops, global_mem=4)
         return struct.unpack('<f', reply[5:])[0]
 
+    def read_color(self) -> float:
+        ops = b''.join([
+            ev3.opInput_Device,
+            ev3.READY_SI,
+            ev3.LCX(0),          # LAYER
+            ev3.LCX(0),          # NO
+            ev3.LCX(4),          # TYPE - EV3-IR
+            ev3.LCX(2),          # MODE - Proximity
+            ev3.LCX(1),          # VALUES
+            ev3.GVX(0)           # VALUE1
+        ])
+        reply = self.send_direct_cmd(ops, global_mem=4)
+        color = struct.unpack('<f', reply[5:])[0]
+        if color not in (2,3,4,5):
+            color = 5
+        return color
+
     def grab_object(self, speed: int, speed_claw: int) -> float:
+        speed = int(speed/2)
         self.claw(speed_claw, open=True)
-        self.drive_straight(-speed,0.10)
-        self.drive_turn(int(speed/2), radius_turn=0, right_turn=True, angle=180)
-        self.drive_straight(-speed,0.10)
+        self.drive_straight(-speed,0.05)
+        self.drive_turn(speed, radius_turn=0, right_turn=False, angle=180)
+        self.drive_straight(-speed,0.12)
         self.claw(speed_claw, open=False)
     
     def leave_object(self, speed: int, speed_claw: int) -> float:
@@ -598,8 +618,8 @@ class TwoWheelVehicle(ev3.EV3):
             angle: float=None,
     ) -> None:
         assert angle > 0, "angle needs to be positive"
-        self.drive_turn(int(speed/2), radius_turn=0, right_turn=False, angle=int(angle/2))
-        self.move(int(speed/4), -200)
+        self.drive_turn(int(speed/2), radius_turn=0, right_turn=True, angle=int(angle/2))
+        self.move(int(speed/4), 200)
         step_outer = self._polarity * angle * (0.5 * self._tread) / self._radius_wheel
         step_inner = self._polarity * angle * (-0.5 * self._tread) / self._radius_wheel
         direction = - math.copysign(1, speed)
