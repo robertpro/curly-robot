@@ -14,9 +14,9 @@ import sys
 url = "http://192.168.8.4:8080/shot.jpg"
 
 
-RED = 'red'
-BLUE = 'blue'
-GREEN = 'green'
+RED = 5
+BLUE = 2
+GREEN = 3
 
 
 COLORS = {
