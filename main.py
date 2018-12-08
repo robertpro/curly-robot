@@ -6,7 +6,7 @@ from measurement_test.black_board import find_obj, find_board, take_pic, get_img
 from measurement_test import black_board
 
 HOST = '192.168.43.191'  # The remote host
-PORT = 50009  # The same port as used by the server
+PORT = 50007  # The same port as used by the server
 
 
 def main():
