@@ -124,8 +124,8 @@ def take_pic():
         img = cv2.imdecode(img_array, -1)
         img = cv2.resize(img, (800, 600))
 
-        cv2.imshow("Android Cam", img)
-        cv2.waitKey(0)
+        #cv2.imshow("Android Cam", img)
+        #cv2.waitKey(0)
 
     except:
         print("Unable to get image from " + url)
