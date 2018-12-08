@@ -11,7 +11,7 @@ import imutils
 import sys
 
 
-url = "http://192.168.8.4:8080/shot.jpg"
+url = "http://192.168.43.25:8080/shot.jpg"
 
 
 RED = 'red'
@@ -22,11 +22,11 @@ GREEN = 'green'
 COLORS = {
     RED: ([56, 91, 235], [116, 151, 255]),
     BLUE: ([198, 116, 39], [255, 176, 99]),
-    GREEN: ([116, 192, 19], [186, 252, 79])
+    # GREEN: ([116, 192, 19], [186, 252, 79])
 }
 
 
-def find_obj(image, color, heigth_coefficient, width_coefficient):
+def find_obj(image, color, board_coefficient):
     image_height, image_width, _ = image.shape
     # find the shapes with the color in the image
     lower, upper = COLORS[color]
@@ -64,8 +64,8 @@ def find_obj(image, color, heigth_coefficient, width_coefficient):
     #print(cX, cY)
     #print("Black board origin coordinates in cms")
     #print(cX * cm_pixel_heigth_coefficient, cY * cm_pixel_heigth_coefficient)
-    x = cX * width_coefficient
-    y = cY * heigth_coefficient
+    x = cX * board_coefficient
+    y = cY * board_coefficient
     return x, y
 
 
@@ -101,11 +101,11 @@ def find_board(image):
     _, yU = rect.astype("int")[2]
     xB, yB = rect.astype("int")[3]
     board_width_in_pixels = xU - xL
-    board_width_in_cm = 222.4
+    board_width_in_cm = 122.4
     board_heigth_in_pixels = yU - yL
     board_heigth_in_cm = 80.35
-    width_coefficient = board_width_in_cm / board_width_in_pixels
-    heigth_coefficient = board_heigth_in_cm / board_heigth_in_pixels
+    board_coefficient = board_width_in_cm / board_width_in_pixels
+    #board_coefficient = board_heigth_in_cm / board_heigth_in_pixels
     #cv2.imshow("Board", image)
     #cv2.waitKey(0)
     #print("Black board origin coordinates in pixels")
@@ -114,7 +114,7 @@ def find_board(image):
     #print("Black board origin coordinates in cms")
     #print(xO * heigth_coefficient, yO * heigth_coefficient)
 
-    return heigth_coefficient, width_coefficient
+    return board_coefficient
 
 
 def take_pic():
