@@ -25,10 +25,10 @@ def main():
     else:
         image = take_pic()
 
-    board_coefficient = find_board(image=image)
+    heigth_coefficient, width_coefficient = find_board(image=image)
     for color in black_board.COLORS.keys():
         print(f"Finding color: {color}")
-        x, y = find_obj(image, color, board_coefficient)
+        x, y = find_obj(image, color, heigth_coefficient, width_coefficient)
         print(f"Color found: {color} | X:{x}, Y:{y}")
 
         print(f"Sending lego to {x}, {y} for color {color}")
